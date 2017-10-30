@@ -49,8 +49,8 @@ public class NaiveBayes {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		String spamPath = "./data/train/spam";
-		String hamPath = "./data/train/ham";
+		String spamPath = args[0]+ "/train/spam";
+		String hamPath = args[0]+ "/train/ham";
 
 		File spamFolder = new File(spamPath);
 		File hamFolder = new File(hamPath);
