@@ -85,13 +85,14 @@ public class NaiveBayes {
 
 			wordsInAnEmail.retainAll(allWords);
 
-			double prob = probSpam;
+			double spamLog = Math.log(probSpam);
+			double hamLog = Math.log(probHam);
 
 			for(String s : wordsInAnEmail) {
-				prob *= spamProbs.get(s);
-				prob /= (probSpam * spamProbs.get(s) + probHam * hamProbs.get(s));
+				spamLog += Math.log(spamProbs.get(s));
+				hamLog += Math.log(hamProbs.get(s));
 			}
-			if (prob > 0.5) {
+			if (spamLog > hamLog) {
 				System.out.println(f.getName() + " spam");
 			} else {
 				System.out.println(f.getName() + " ham");
