@@ -55,47 +55,48 @@ public class NaiveBayes {
 		File spamFolder = new File(spamPath);
 		File hamFolder = new File(hamPath);
 
-		//+2 for laplace smoothing
-		int spamEmailCount = spamFolder.listFiles().length + 2;
-		int hamEmailCount = hamFolder.listFiles().length + 2;
+		int spamEmailCount = spamFolder.listFiles().length;
+		int hamEmailCount = hamFolder.listFiles().length;
 
 		Set<String> allWords = getAllWords(spamFolder,hamFolder);
 
 		Map<String, Double> spamProbs = returnProbability(spamFolder, allWords, spamEmailCount);
-		Map<String, Double> hamProbs = returnProbability(hamPath);
-		//printMap(spamProbs);
-		//printMap(hamProbs);
-		double numSpam = (new File(spamPath).listFiles().length);
-		double numHam = new File(hamPath).listFiles().length;
-		double probSpam = numSpam/ (numHam+numSpam);
-		double probHam = numHam / (numHam+numSpam);
+		Map<String, Double> hamProbs = returnProbability(hamFolder, allWords, hamEmailCount);
 
-		Set<String> masterWords = new HashSet<>();
-		masterWords.addAll(spamProbs.keySet());
-		masterWords.addAll(hamProbs.keySet());
+//		System.out.println("Spam probs:");
+//		printMap(spamProbs);
+//		System.out.println("Ham probs:");
+//		printMap(hamProbs);
 
+		double probSpam = 1.0 * spamEmailCount/ (hamEmailCount+spamEmailCount);
+		double probHam = 1.0 * hamEmailCount / (hamEmailCount+spamEmailCount);
+
+//		System.out.println("Probham: " + probHam);
+//		System.out.println("Probspam: " +probSpam);
 
 		String testPath = "./data/test";
 		File test = new File(testPath);
-		for(File f: test.listFiles()) {
-			Set<String> words = tokenSet(f);
 
-			words.retainAll(masterWords);
+		//Set<String> wordsInAnEmail = new HashSet<>();
+
+
+		for(File f: test.listFiles()) {
+			Set<String> wordsInAnEmail = tokenSet(f);
+
+			wordsInAnEmail.retainAll(allWords);
 
 			double prob = probSpam;
 
-			for(String s : words) {
+			for(String s : wordsInAnEmail) {
 				prob *= spamProbs.get(s);
 				prob /= (probSpam * spamProbs.get(s) + probHam * hamProbs.get(s));
 			}
 			if (prob > 0.5) {
-				System.out.println("spam");
-
+				System.out.println(f.getName() + " spam");
 			} else {
-				System.out.println("ham");
+				System.out.println(f.getName() + " ham");
 			}
 		}
-
 	}
 
 	private static void printMap (Map<String, Double> m) {
@@ -109,10 +110,11 @@ public class NaiveBayes {
 														  int emailCount) throws IOException {
 		Map<String, Integer> words = new HashMap<>();
 
-		//initialize all words to 1
 		for(String s : allWords) {
+			//start 1 for laplace smoothing
 			words.put(s, 1);
 		}
+
 		//count spam or ham words
 		for( File f : folder.listFiles()){
 			Set<String> tokens = tokenSet(f);
@@ -127,9 +129,8 @@ public class NaiveBayes {
 		Map<String,Double> probabilities = new HashMap<>();
 		for(String s : words.keySet()) {
 			probabilities.put(s, (words.get(s).doubleValue())/(emailCount+2));
-			//System.out.println(s + " " + probOfWordGivenSpam.get(s));
 		}
-		return probOfWordGivenSpam;
+		return probabilities;
 	}
 
 
