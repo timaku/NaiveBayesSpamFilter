@@ -63,26 +63,15 @@ public class NaiveBayes {
 		Map<String, Double> spamProbs = returnProbability(spamFolder, allWords, spamEmailCount);
 		Map<String, Double> hamProbs = returnProbability(hamFolder, allWords, hamEmailCount);
 
-//		System.out.println("Spam probs:");
-//		printMap(spamProbs);
-//		System.out.println("Ham probs:");
-//		printMap(hamProbs);
-
 		double probSpam = 1.0 * spamEmailCount/ (hamEmailCount+spamEmailCount);
 		double probHam = 1.0 * hamEmailCount / (hamEmailCount+spamEmailCount);
 
-//		System.out.println("Probham: " + probHam);
-//		System.out.println("Probspam: " +probSpam);
-
-		String testPath = "./data/test";
+		//begin classifying test data
+		String testPath = args[0]+ "/test";
 		File test = new File(testPath);
-
-		//Set<String> wordsInAnEmail = new HashSet<>();
-
 
 		for(File f: test.listFiles()) {
 			Set<String> wordsInAnEmail = tokenSet(f);
-
 			wordsInAnEmail.retainAll(allWords);
 
 			double spamLog = Math.log(probSpam);
@@ -100,6 +89,7 @@ public class NaiveBayes {
 		}
 	}
 
+	//for debugging
 	private static void printMap (Map<String, Double> m) {
 		for(String s : m.keySet()) {
 			System.out.println(s + " " + m.get(s));
