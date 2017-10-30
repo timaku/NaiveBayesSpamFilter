@@ -27,11 +27,41 @@ public class NaiveBayes {
 		filescan.close();
 		return tokens;
 	}
+
+
+	private static Set<String> getAllWords(File spamFolder, File hamFolder) throws IOException {
+		Set<String> result = new HashSet<>();
+
+		for(File f : spamFolder.listFiles()){
+			Set<String> tokens = tokenSet(f);
+			for (String s : tokens) {
+				result.add(s);
+			}
+		}
+
+		for(File f : hamFolder.listFiles()){
+			Set<String> tokens = tokenSet(f);
+			for (String s : tokens) {
+				result.add(s);
+			}
+		}
+		return result;
+	}
 	
 	public static void main(String[] args) throws IOException {
 		String spamPath = "./data/train/spam";
 		String hamPath = "./data/train/ham";
-		Map<String, Double> spamProbs = returnProbability(spamPath);
+
+		File spamFolder = new File(spamPath);
+		File hamFolder = new File(hamPath);
+
+		//+2 for laplace smoothing
+		int spamEmailCount = spamFolder.listFiles().length + 2;
+		int hamEmailCount = hamFolder.listFiles().length + 2;
+
+		Set<String> allWords = getAllWords(spamFolder,hamFolder);
+
+		Map<String, Double> spamProbs = returnProbability(spamFolder, allWords, spamEmailCount);
 		Map<String, Double> hamProbs = returnProbability(hamPath);
 		//printMap(spamProbs);
 		//printMap(hamProbs);
@@ -75,27 +105,28 @@ public class NaiveBayes {
 		System.out.println();
 	}
 
-	private static Map<String, Double> returnProbability (String filePath) throws IOException {
-		File actual = new File(filePath);
+	private static Map<String, Double> returnProbability (File folder, Set<String> allWords,
+														  int emailCount) throws IOException {
+		Map<String, Integer> words = new HashMap<>();
 
-		Map<String, Integer> spamWords = new HashMap<>();
-		int spamEmailCount = actual.listFiles().length;
-		for( File f : actual.listFiles()){
-
+		//initialize all words to 1
+		for(String s : allWords) {
+			words.put(s, 1);
+		}
+		//count spam or ham words
+		for( File f : folder.listFiles()){
 			Set<String> tokens = tokenSet(f);
 			for (String s : tokens) {
-				if(spamWords.containsKey(s)) {
-					spamWords.put(s, spamWords.get(s)+1);
-				} else {
-					spamWords.put(s, 1);
+				if(words.containsKey(s)) {
+					words.put(s, words.get(s)+1);
 				}
 			}
-			//System.out.println( f.getName() );
 		}
 
-		Map<String,Double> probOfWordGivenSpam = new HashMap<>();
-		for(String s : spamWords.keySet()) {
-			probOfWordGivenSpam.put(s, (1 + spamWords.get(s).doubleValue())/(spamEmailCount+2));
+		//calculate probabilities
+		Map<String,Double> probabilities = new HashMap<>();
+		for(String s : words.keySet()) {
+			probabilities.put(s, (words.get(s).doubleValue())/(emailCount+2));
 			//System.out.println(s + " " + probOfWordGivenSpam.get(s));
 		}
 		return probOfWordGivenSpam;
