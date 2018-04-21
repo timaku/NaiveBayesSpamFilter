@@ -49,8 +49,8 @@ public class NaiveBayes {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		String spamPath = args[0]+ "/train/spam";
-		String hamPath = args[0]+ "/train/ham";
+		String spamPath = "data/train/spam";
+		String hamPath = "data/train/ham";
 
 		File spamFolder = new File(spamPath);
 		File hamFolder = new File(hamPath);
@@ -67,7 +67,7 @@ public class NaiveBayes {
 		double probHam = 1.0 * hamEmailCount / (hamEmailCount+spamEmailCount);
 
 		//begin classifying test data
-		String testPath = args[0]+ "/test";
+		String testPath = "data/test";
 		File test = new File(testPath);
 
 		for(File f: test.listFiles()) {
